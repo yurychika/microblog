@@ -8,7 +8,10 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path'),
-  util = require('util');
+  util = require('util'),
+  db = require('./models/db');
+
+
 
 var app = express();
 
