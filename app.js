@@ -27,11 +27,6 @@ app.set('view options', {
 
 
 
-// app.use(function(req, res, next){
-// 	console.log('this is the start of the request');
-// 	next();
-
-// });
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
@@ -43,6 +38,16 @@ app.use(express.session({
       db: settings.db 
     }) 
   }));
+app.use(function(req, res, next){
+	res.locals.success = req.session.success;
+	res.locals.error = req.session.error;
+
+	delete req.session.success;
+	delete req.session.error;
+	// console.log('this is the start of the request');
+	next();
+
+});
 app.use(app.router);
 // app.use(express.router(routes));
 app.use(express.static(path.join(__dirname, 'public')));
