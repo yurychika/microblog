@@ -10,6 +10,39 @@ module.exports = function(app){
 	  res.render('index', { title: 'Express', list: [1,2,3] });
 	});
 
+	app.get('/login', function(req, res){
+	  res.render('login', { title: 'Express', list: [1,2,3] });
+	});
+
+	app.post('/login', function(req, res){
+		var username = req.param('username');
+		var password = req.param('password');
+
+		var md5 = crypto.createHash('md5'); 
+		var password = md5.update(req.body.password).digest('base64'); 
+		   
+		var newUser = new User({ 
+		    name: username, 
+		    password: password, 
+		});
+
+		User.get(newUser.name, function(err, user){
+			if(!user || user.password != password){
+				err = 'invalid user';
+			}
+			if(err){
+				req.session.error = err;
+				// res.send(password + ' ' + user.password);
+				res.redirect('/login');
+			}
+			res.send('login success, this is the new shit');
+
+		}) 
+
+
+	  // res.render('login', { title: 'Express', list: [1,2,3] });
+	});
+
 	app.get('/reg', function(req, res){
 	  res.render('reg', { title: 'Express', list: [1,2,3] });
 	});	
