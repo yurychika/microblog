@@ -9,7 +9,9 @@ var express = require('express')
   , http = require('http')
   , path = require('path'),
   util = require('util'),
-  db = require('./models/db');
+  // db = require('./models/db'),
+MongoStore = require('connect-mongo')(express),
+  settings  = require('./settings');
 
 
 
@@ -24,26 +26,27 @@ app.set('view options', {
 });
 
 
-// app.use(function(req, res){
+
+// app.use(function(req, res, next){
 // 	console.log('this is the start of the request');
+// 	next();
+
 // });
-
-app.use(function(req, res, next){
-	console.log('this is the start of the request');
-	next();
-
-});
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(express.cookieParser()); 
+app.use(express.session({ 
+    secret: settings.cookieSecret, 
+    store: new MongoStore({ 
+      db: settings.db 
+    }) 
+  }));
 app.use(app.router);
 // app.use(express.router(routes));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function(req, res){
-	console.log('this is the start of the request');
-});
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
