@@ -4,14 +4,40 @@
  */
 var crypto = require('crypto');
 var User = require('../models/user');
+var Post = require('../models/post');
 
 module.exports = function(app){
 	app.get('/', function(req, res){
 	  res.render('index', { title: 'Express', list: [1,2,3] });
 	});
 
+	app.get('/login', checkNotLoginIn);
 	app.get('/login', function(req, res){
 	  res.render('login', { title: 'Express', list: [1,2,3] });
+	});
+
+	app.get('/post', checkLoginIn);
+	app.get('/post', function(req, res){
+		res.render('post');
+	});
+
+	app.post('/post', checkLoginIn);
+	app.post('/post', function(req, res){
+		var text = req.body.text;
+		var post = new Post({
+			username: req.session.user.name,
+			text: text,
+			time: new Date().getTime()
+		});
+
+		post.save(function(err){
+			if(err){
+				req.session.error = err;
+				return res.redirect('/');
+			}
+			res.send('save post successfully');
+		});
+
 	});
 
 	app.post('/login', function(req, res){
@@ -35,6 +61,7 @@ module.exports = function(app){
 				// res.send(password + ' ' + user.password);
 				res.redirect('/login');
 			}
+			req.session.user = user;
 			res.send('login success, this is the new shit');
 
 		}) 
@@ -90,3 +117,17 @@ module.exports = function(app){
 		});		
 	  // res.render('doReg', { title: 'Express', list: [1,2,3] });
 };
+
+function checkLoginIn(req, res, next){
+	if(!req.session.user){
+		return res.redirect('/login');
+	}
+	next();
+}
+
+function checkNotLoginIn(req, res, next){
+	if(req.session.user){
+		return res.redirect('/');
+	}
+	next();
+}
